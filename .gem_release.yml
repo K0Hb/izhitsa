@@ -1,0 +1,4 @@
+bump:
+  file: lib/izhitsa/version.rb
+  skip_ci: true
+
