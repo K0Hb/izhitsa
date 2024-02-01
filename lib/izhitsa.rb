@@ -4,8 +4,10 @@ require "izhitsa/version"
 
 module Izhitsa
   ALL_LATTERS = %w[А Б В Г Д Е Ё Ж З И Й К Л М Н О П Р С Т У Ф Х Ц Ч Ш Щ Ъ Ы Ь Э Ю Я]
-  UPPER_CONSONANT_LETTERS = %w[Б В Г Д Ж З К Л М Н П Р С Т Ф Х Ц Ч Ш Щ]
-  LOWER_CONSONANT_LETTERS = %w[б в г д ж з к л м н п р с т ф х ц ч ш щ]
+  UPPER_CONSONANT_LETTERS = %w[Б В Г Д Ж З К Л М Н П Р С Т Ф Х Ц Ч Ш Щ].freeze
+  LOWER_CONSONANT_LETTERS = %w[б в г д ж з к л м н п р с т ф х ц ч ш щ].freeze
+  UPPER_VOWEL_LETTERS = %w[А Е Ё И Й О У Ы Э Ю Я].freeze
+  LOWER_VOWEL_LETTERS = %w[а е ё и й о у ы э ю я].freeze
 
   def self.convert(str)
     return str unless str.is_a? String
@@ -13,10 +15,15 @@ module Izhitsa
     str.gsub(/[а-яА-Я]{2,}/) do |word|
       if word.downcase.end_with?(*LOWER_CONSONANT_LETTERS)
         x = "ъ"
-        x.upcase! if word[-1] == word[-1].upcase
+        x = "Ъ" if word[-1] == word[-1].upcase
 
-        "#{word}#{x}"
+        word = "#{word}#{x}"
       end
+
+      word.gsub!(/(и)([#{LOWER_VOWEL_LETTERS}])/, 'і\2')
+      word.gsub!(/(И)([#{UPPER_VOWEL_LETTERS}])/, 'І\2')
+
+      word
     end
   end
 end
