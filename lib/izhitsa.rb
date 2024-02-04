@@ -12,18 +12,32 @@ module Izhitsa
   def self.convert(str)
     return str unless str.is_a? String
 
-    str.gsub(/[а-яА-Я]{2,}/) do |word|
-      if word.downcase.end_with?(*LOWER_CONSONANT_LETTERS)
-        x = "ъ"
-        x = "Ъ" if word[-1] == word[-1].upcase
-
-        word = "#{word}#{x}"
-      end
-
-      word.gsub!(/(и)([#{LOWER_VOWEL_LETTERS}])/, 'і\2')
-      word.gsub!(/(И)([#{UPPER_VOWEL_LETTERS}])/, 'І\2')
+    each_all_words(str) do |word|
+      word = use_rule_1(word)
+      word = use_rule_2(word)
 
       word
     end
+  end
+
+  private
+
+  def self.each_all_words(text, &block)
+    text.gsub(/[а-яА-Я]{2,}/) { |word| yield word }
+  end
+
+  def self.use_rule_1(word)
+    return word unless word.downcase.end_with?(*LOWER_CONSONANT_LETTERS)
+
+    word.downcase.end_with?(*LOWER_CONSONANT_LETTERS)
+
+    x = word[-1] == word[-1].upcase ? "Ъ" : "ъ"
+
+    word = "#{word}#{x}"
+  end
+
+  def self.use_rule_2(word)
+    word = word.gsub(/(и)([#{LOWER_VOWEL_LETTERS}])/, 'і\2')
+    word = word.gsub(/(И)([#{UPPER_VOWEL_LETTERS}])/, 'І\2')
   end
 end
