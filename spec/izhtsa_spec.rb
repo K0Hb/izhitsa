@@ -16,4 +16,6 @@ RSpec.describe Izhitsa do
   it { expect(subject.convert("линия")).to eq("линія") }
   it { expect(subject.convert("ЛИНИЯ")).to eq("ЛИНІЯ") }
   it { expect(subject.convert("другие, синий.")).to eq("другіе, синій.") }
+  it { expect(subject.convert("Афины, Миф, Федя, арифметика")).to eq("Аѳины, Миѳъ, Ѳедя, ариѳметика") }
+  it { expect(subject.convert("миро, Иподіаконъ, ипостась")).to eq("мѵро, Иподъіаконъ, ѵпостась") }
 end

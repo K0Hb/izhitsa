@@ -9,12 +9,23 @@ module Izhitsa
   UPPER_VOWEL_LETTERS = %w[А Е Ё И Й О У Ы Э Ю Я].freeze
   LOWER_VOWEL_LETTERS = %w[а е ё и й о у ы э ю я].freeze
 
+  FITA_WORDS = %w[Агафья Анфимъ Афанасій Афина Варфоломей Голіафъ Евфимій Марфа Матфей Мефодій Нафанаилъ Парфенонъ Пифагоръ Руфь Саваофъ
+    Тимофей Эсфирь Іудифь Фаддей Фекла Фемида Фемистоклъ Феодоръ Федя Феодосій Феодосія Феодотъ Феофанъ Феофилъ Ферапонтъ Фома Фоминична
+    Афины Афонъ Вифанія Вифезда Вифинія Вифлеемъ Вифсаида Гефсиманія Голгофа Карфагенъ Коринфъ Марафонъ Парфія Парфенонъ Эфіопія Фаворъ
+    Феодосія Фермофилы Фессалія Фессалоники Фивы Фракія Коринфяне Парфяне Скифы Эфіопы Фиване Анафема Акафистъ Апофеозъ Апофегма Арифметика
+    Дифирамбъ Ефимоны Кафолическій Кафедра Кафизма Кифара Левіафанъ Логарифмъ Марафонъ Мифъ Мифологія Монофелитство Орфографія Орфоэпія
+    Пафосъ Рифма Эфиръ Фиміамъ Фита].freeze
+
+  IZHITSA_WORDS = %w[миро иподіаконъ ипостась]
+
   def self.convert(str)
     return str unless str.is_a? String
 
     each_all_words(str) do |word|
       word = use_rule_1(word)
       word = use_rule_2(word)
+      word = use_rule_3(word)
+      word = use_rule_4(word)
 
       word
     end
@@ -22,22 +33,36 @@ module Izhitsa
 
   private
 
-  def self.each_all_words(text, &block)
-    text.gsub(/[а-яА-Я]{2,}/) { |word| yield word }
-  end
+  class << self
+    def each_all_words(text, &block)
+      text.gsub(/[а-яА-Я]{2,}/) { |word| yield word }
+    end
 
-  def self.use_rule_1(word)
-    return word unless word.downcase.end_with?(*LOWER_CONSONANT_LETTERS)
+    def use_rule_1(word)
+      return word unless word.downcase.end_with?(*LOWER_CONSONANT_LETTERS)
 
-    word.downcase.end_with?(*LOWER_CONSONANT_LETTERS)
+      word.downcase.end_with?(*LOWER_CONSONANT_LETTERS)
 
-    x = word[-1] == word[-1].upcase ? "Ъ" : "ъ"
+      x = (word[-1] == word[-1].upcase) ? "Ъ" : "ъ"
 
-    word = "#{word}#{x}"
-  end
+      "#{word}#{x}"
+    end
 
-  def self.use_rule_2(word)
-    word = word.gsub(/(и)([#{LOWER_VOWEL_LETTERS}])/, 'і\2')
-    word = word.gsub(/(И)([#{UPPER_VOWEL_LETTERS}])/, 'І\2')
+    def use_rule_2(word)
+      word.gsub(/(и)([#{LOWER_VOWEL_LETTERS}])/, 'і\2')
+        .gsub(/(И)([#{UPPER_VOWEL_LETTERS}])/, 'І\2')
+    end
+
+    def use_rule_3(word)
+      return word unless FITA_WORDS.include?(word.capitalize)
+
+      word.gsub("ф", "ѳ").gsub("Ф", "Ѳ")
+    end
+
+    def use_rule_4(word)
+      return word unless IZHITSA_WORDS.include?(word.downcase)
+
+      word.gsub("и", "ѵ").gsub("и", "Ѵ")
+    end
   end
 end
