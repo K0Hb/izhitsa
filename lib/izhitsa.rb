@@ -20,6 +20,8 @@ module Izhitsa
 
   IAT_WORDS = %w[Днепръ Днестръ Неманъ Апрель Авдей Алексей Елисей Еремей Матвей Сергей Вена Гнездо Звезда Седло Издевка Зевать]
 
+  EGO_WORDS = %w[вашего всего его моего нашего него нечего ничего своего сего твоего чего]
+
   def self.convert(str)
     return str unless str.is_a? String
 
@@ -31,6 +33,7 @@ module Izhitsa
       word = use_rule_5(word)
       word = use_rule_6(word)
       word = use_rule_7(word)
+      word = use_rule_8(word)
 
       word
     end
@@ -77,6 +80,7 @@ module Izhitsa
     end
 
     def use_rule_6(word) # Ять(ѣ)
+      # Дописать правила, самый сложный блок. TODO
       return word unless IAT_WORDS.include?(word.capitalize)
 
       word = word.gsub("е", "ѣ").gsub("Е", "Ѣ") if word.count("е") == 1 || word.count("Е") == 1
@@ -90,6 +94,18 @@ module Izhitsa
         word.downcase.start_with?("бес", "черес", "чрес")
 
       word.sub("с", "з").sub("С", "З")
+    end
+
+    def use_rule_8(word) # окончание
+      return word if EGO_WORDS.include?(word.downcase)
+
+      if word.downcase.match?(/.*[жшчщ](его|егос)/)
+        word.sub("его", "аго").sub("ЕГО", "АГО").sub("егося", "агося").sub("ЕГОСЯ", "АГОСЯ")
+      elsif word.downcase.end_with?("его", "егося")
+        word.sub("его", "яго").sub("ЕГО", "ЯГО").sub("егося", "ягося").sub("ЕГОСЯ", "ЯГОСЯ")
+      else
+        word
+      end
     end
   end
 end

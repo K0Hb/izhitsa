@@ -32,4 +32,8 @@ RSpec.describe Izhitsa do
   it { expect(subject.convert("Бесполезный, бестактный и бессоница")).to eq("Безполезный, безтактный и безсоница") }
   it { expect(subject.convert("РАССКАЗ И БЕССОНИЦА")).to eq("РАЗСКАЗЪ И БЕЗСОНИЦА") }
   it { expect(subject.convert("распад")).to eq("распадъ") }
+
+  it { expect(subject.convert("вещего, павшего и учащегося")).to eq("вещаго, павшаго и учащагося") }
+  it { expect(subject.convert("синего, среднего")).to eq("синяго, средняго") }
+  it { expect(subject.convert("вашего, нашего и своего")).to eq("вашего, нашего и своего") }
 end
