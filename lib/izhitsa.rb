@@ -16,7 +16,9 @@ module Izhitsa
     Дифирамбъ Ефимоны Кафолическій Кафедра Кафизма Кифара Левіафанъ Логарифмъ Марафонъ Мифъ Мифологія Монофелитство Орфографія Орфоэпія
     Пафосъ Рифма Эфиръ Фиміамъ Фита].freeze
 
-  IZHITSA_WORDS = %w[миро иподіаконъ ипостась]
+  IZHITSA_WORDS = %w[миро иподіаконъ ипостась символъ синодъ]
+
+  IAT_WORDS = %w[Днепръ Днестръ Неманъ Апрель Авдей Алексей Елисей Еремей Матвей Сергей Вена Гнездо Звезда Седло Издевка Зевать]
 
   def self.convert(str)
     return str unless str.is_a? String
@@ -26,6 +28,9 @@ module Izhitsa
       word = use_rule_2(word)
       word = use_rule_3(word)
       word = use_rule_4(word)
+      word = use_rule_5(word)
+      word = use_rule_6(word)
+      word = use_rule_7(word)
 
       word
     end
@@ -35,10 +40,10 @@ module Izhitsa
 
   class << self
     def each_all_words(text, &block)
-      text.gsub(/[а-яА-Я]{2,}/) { |word| yield word }
+      text.gsub(/[а-яА-ЯёЁ]{2,}/) { |word| yield word }
     end
 
-    def use_rule_1(word)
+    def use_rule_1(word) # окончания на Ъ
       return word unless word.downcase.end_with?(*LOWER_CONSONANT_LETTERS)
 
       word.downcase.end_with?(*LOWER_CONSONANT_LETTERS)
@@ -48,21 +53,43 @@ module Izhitsa
       "#{word}#{x}"
     end
 
-    def use_rule_2(word)
-      word.gsub(/(и)([#{LOWER_VOWEL_LETTERS}])/, 'і\2')
-        .gsub(/(И)([#{UPPER_VOWEL_LETTERS}])/, 'І\2')
+    def use_rule_2(word) # i
+      word.gsub(/(и)([#{UPPER_VOWEL_LETTERS}#{LOWER_VOWEL_LETTERS}])/, 'і\2')
+        .gsub(/(И)([#{UPPER_VOWEL_LETTERS}#{LOWER_VOWEL_LETTERS}])/, 'І\2')
+        .gsub(/(Й)([#{UPPER_VOWEL_LETTERS}#{LOWER_VOWEL_LETTERS}])/, 'І\2')
+        .gsub(/(й)([#{UPPER_VOWEL_LETTERS}#{LOWER_VOWEL_LETTERS}])/, 'і\2')
     end
 
-    def use_rule_3(word)
+    def use_rule_3(word) # Ё
+      word.gsub("ё", "е").gsub("Ё", "Е")
+    end
+
+    def use_rule_4(word) # Ижица(ѵ)
+      return word unless IZHITSA_WORDS.include?(word.downcase)
+
+      word.gsub("и", "ѵ").gsub("и", "Ѵ")
+    end
+
+    def use_rule_5(word) # Фита(ѳ)
       return word unless FITA_WORDS.include?(word.capitalize)
 
       word.gsub("ф", "ѳ").gsub("Ф", "Ѳ")
     end
 
-    def use_rule_4(word)
-      return word unless IZHITSA_WORDS.include?(word.downcase)
+    def use_rule_6(word) # Ять(ѣ)
+      return word unless IAT_WORDS.include?(word.capitalize)
 
-      word.gsub("и", "ѵ").gsub("и", "Ѵ")
+      word = word.gsub("е", "ѣ").gsub("Е", "Ѣ") if word.count("е") == 1 || word.count("Е") == 1
+      word = word.gsub("ей", "ѣй").gsub("ЕЙ", "ѢЙ") if word.end_with?("ей", "ЕЙ")
+
+      word
+    end
+
+    def use_rule_7(word) # приставки
+      return word unless word.downcase.match?(/^(ис|вос|рас|рос|нис)с.*/) ||
+        word.downcase.start_with?("бес", "черес", "чрес")
+
+      word.sub("с", "з").sub("С", "З")
     end
   end
 end
