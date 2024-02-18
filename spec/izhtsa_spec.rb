@@ -7,10 +7,10 @@ RSpec.describe Izhitsa do
 
   it { expect(subject.convert("some text in English")).to eq("some text in English") }
 
-  it { expect(subject.convert("Хлеб")).to eq("Хлебъ") }
-  it { expect(subject.convert("ХЛЕБ")).to eq("ХЛЕБЪ") }
+  it { expect(subject.convert("Хлеб")).to eq("Хлѣбъ") }
+  it { expect(subject.convert("ХЛЕБ")).to eq("ХЛѢБЪ") }
   it { expect(subject.convert("клещ")).to eq("клещъ") }
-  it { expect(subject.convert("Хлеб и обед")).to eq("Хлебъ и обедъ") }
+  it { expect(subject.convert("Хлеб и обед")).to eq("Хлѣбъ и обѣдъ") }
   it { expect(subject.convert("Санкт-Петербург")).to eq("Санктъ-Петербургъ") }
   it { expect(subject.convert("уж замуж невтерпеж")).to eq("ужъ замужъ невтерпежъ") }
 
@@ -33,7 +33,14 @@ RSpec.describe Izhitsa do
   it { expect(subject.convert("РАССКАЗ И БЕССОНИЦА")).to eq("РАЗСКАЗЪ И БЕЗСОНИЦА") }
   it { expect(subject.convert("распад")).to eq("распадъ") }
 
-  it { expect(subject.convert("вещего, павшего и учащегося")).to eq("вещаго, павшаго и учащагося") }
+  it { expect(subject.convert("вещего, павшего и учащегося")).to eq("вѣщаго, павшаго и учащагося") }
+  it { expect(subject.convert("быстрее и сильнее")).to eq("быстрѣе и сильнѣе") }
+  it { expect(subject.convert("быстрейший, смелейший и сильнейший")).to eq("быстрѣйшій, смелѣйшій и сильнѣйшій") }
+
+  it { expect(subject.convert("иметь, сидеть и смотреть")).to eq("имѣть, сидѣть и смотрѣть") }
+
+  it { expect(subject.convert("вместе, кроме, возле, после, налегке, везде, где и вне")).to eq("вместѣ, кромѣ, возлѣ, послѣ, налегкѣ, вездѣ, гдѣ и внѣ") }
+
   it { expect(subject.convert("синего, среднего")).to eq("синяго, средняго") }
   it { expect(subject.convert("вашего, нашего и своего")).to eq("вашего, нашего и своего") }
 end

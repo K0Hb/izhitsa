@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "izhitsa/version"
-
 module Izhitsa
   ALL_LATTERS = %w[А Б В Г Д Е Ё Ж З И Й К Л М Н О П Р С Т У Ф Х Ц Ч Ш Щ Ъ Ы Ь Э Ю Я]
   UPPER_CONSONANT_LETTERS = %w[Б В Г Д Ж З К Л М Н П Р С Т Ф Х Ц Ч Ш Щ].freeze
@@ -16,11 +14,15 @@ module Izhitsa
     Дифирамбъ Ефимоны Кафолическій Кафедра Кафизма Кифара Левіафанъ Логарифмъ Марафонъ Мифъ Мифологія Монофелитство Орфографія Орфоэпія
     Пафосъ Рифма Эфиръ Фиміамъ Фита].freeze
 
-  IZHITSA_WORDS = %w[миро иподіаконъ ипостась символъ синодъ]
+  IZHITSA_WORDS = %w[миро иподіаконъ ипостась символъ синодъ].freeze
 
-  IAT_WORDS = %w[Днепръ Днестръ Неманъ Апрель Авдей Алексей Елисей Еремей Матвей Сергей Вена Гнездо Звезда Седло Издевка Зевать]
+  # пишется .рѣ. && .лѣ.
+  IAT_WORDS = %w[апрель хлебъ].freeze
 
-  EGO_WORDS = %w[вашего всего его моего нашего него нечего ничего своего сего твоего чего]
+  # иностранные слова, в которых ять не пишется
+  IAT_FOREIGN_WORDS = %w[ариѳметика математика алгебра литература метафора кинетика генетика реле].freeze
+
+  EGO_WORDS = %w[вашего всего его моего нашего него нечего ничего своего сего твоего чего].freeze
 
   def self.convert(str)
     return str unless str.is_a? String
@@ -63,8 +65,10 @@ module Izhitsa
         .gsub(/(й)([#{UPPER_VOWEL_LETTERS}#{LOWER_VOWEL_LETTERS}])/, 'і\2')
     end
 
-    def use_rule_3(word) # Ё
-      word.gsub("ё", "е").gsub("Ё", "Е")
+    def use_rule_3(word) # Фита(ѳ)
+      return word unless FITA_WORDS.include?(word.capitalize)
+
+      word.gsub("ф", "ѳ").gsub("Ф", "Ѳ")
     end
 
     def use_rule_4(word) # Ижица(ѵ)
@@ -73,30 +77,14 @@ module Izhitsa
       word.gsub("и", "ѵ").gsub("и", "Ѵ")
     end
 
-    def use_rule_5(word) # Фита(ѳ)
-      return word unless FITA_WORDS.include?(word.capitalize)
-
-      word.gsub("ф", "ѳ").gsub("Ф", "Ѳ")
-    end
-
-    def use_rule_6(word) # Ять(ѣ)
-      # Дописать правила, самый сложный блок. TODO
-      return word unless IAT_WORDS.include?(word.capitalize)
-
-      word = word.gsub("е", "ѣ").gsub("Е", "Ѣ") if word.count("е") == 1 || word.count("Е") == 1
-      word = word.gsub("ей", "ѣй").gsub("ЕЙ", "ѢЙ") if word.end_with?("ей", "ЕЙ")
-
-      word
-    end
-
-    def use_rule_7(word) # приставки
+    def use_rule_5(word) # приставки
       return word unless word.downcase.match?(/^(ис|вос|рас|рос|нис)с.*/) ||
         word.downcase.start_with?("бес", "черес", "чрес")
 
       word.sub("с", "з").sub("С", "З")
     end
 
-    def use_rule_8(word) # окончание
+    def use_rule_6(word) # окончание
       return word if EGO_WORDS.include?(word.downcase)
 
       if word.downcase.match?(/.*[жшчщ](его|егос)/)
@@ -106,6 +94,33 @@ module Izhitsa
       else
         word
       end
+    end
+
+    def use_rule_7(word) # Ять(ѣ)
+      # Дописать правила, самый сложный блок. TODO
+      return word if IAT_FOREIGN_WORDS.include?(word.downcase)
+
+      return word if word.downcase.count("ё") == 1 && word.downcase.count("е").zero?
+
+      return word if word.downcase.count("е") == 2 && word.downcase.match?(/(ере|еле)/) && !word.downcase.end_with?("ейшій", "ЕЙШІЙ", "еть", "ЕТЬ")
+
+      return word if word.downcase.count("е") == 1 && word.downcase.match?(/#{LOWER_CONSONANT_LETTERS}(ре|ле)/) &&
+        !IAT_WORDS.include?(word.downcase) && !word.downcase.end_with?("ейшій", "ЕЙШІЙ", "еть", "ЕТЬ") && !word.downcase.match?(/([#{LOWER_CONSONANT_LETTERS}])(е)$/)
+      return word if word.downcase.count("е") == 1 && word.downcase.start_with?("без", "бес") && !word.downcase.match?("бесъ")
+      return word if word.downcase.count("е") == 1 && word.end_with?("его")
+
+      word = word.gsub(/([#{LOWER_CONSONANT_LETTERS}])(е)/, '\1ѣ').gsub(/([#{UPPER_CONSONANT_LETTERS}])(Е)/, '\1Ѣ') if word.downcase.count("е") == 1
+      word = word.gsub(/([#{LOWER_CONSONANT_LETTERS}])(е)$/, '\1ѣ').gsub(/([#{UPPER_CONSONANT_LETTERS}])(Е)$/, '\1Ѣ')
+      word = word.gsub("ей", "ѣй").gsub("ЕЙ", "ѢЙ") if word.end_with?("ей", "ЕЙ")
+      word = word.gsub("ее", "ѣе").gsub("ЕЕ", "ѢЕ") if word.end_with?("ее", "ЕЕ")
+      word = word.gsub("ейшій", "ѣйшій").gsub("ЕЙШІЙ", "ѢЙШІЙ") if word.end_with?("ейшій", "ЕЙШІЙ")
+      word = word.gsub("еть", "ѣть").gsub("ЕТЬ", "ѢТЬ") if word.end_with?("еть", "ЕТЬ")
+
+      word
+    end
+
+    def use_rule_8(word) # Ё
+      word.gsub("ё", "е").gsub("Ё", "Е")
     end
   end
 end
